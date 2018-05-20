@@ -7,6 +7,12 @@ Rails.application.routes.draw do
     passwords:  'api/v1/passwords'
   }
 
+  devise_for :users, as: :web
+
+  root to: 'pencas#index'
+
+  resources :pencas, only: [:index]
+
   namespace :api do
     namespace :v1, defaults: { format: :json } do
       devise_scope :user do
