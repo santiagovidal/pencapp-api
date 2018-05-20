@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20161027190856) do
+ActiveRecord::Schema.define(version: 20180520045039) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -47,6 +47,54 @@ ActiveRecord::Schema.define(version: 20161027190856) do
     t.index ["priority", "run_at"], name: "delayed_jobs_priority"
   end
 
+  create_table "groups", force: :cascade do |t|
+    t.string "name"
+  end
+
+  create_table "initial_predictions", force: :cascade do |t|
+    t.integer "code"
+    t.integer "points"
+    t.string "result"
+    t.string "description"
+  end
+
+  create_table "matches", force: :cascade do |t|
+    t.string "result"
+    t.datetime "date"
+    t.string "location"
+    t.integer "phase"
+    t.string "country1"
+    t.string "country2"
+    t.bigint "group_id"
+    t.index ["group_id"], name: "index_matches_on_group_id"
+  end
+
+  create_table "penca_users", force: :cascade do |t|
+    t.bigint "user_id"
+    t.bigint "penca_id"
+    t.index ["penca_id"], name: "index_penca_users_on_penca_id"
+    t.index ["user_id"], name: "index_penca_users_on_user_id"
+  end
+
+  create_table "pencas", force: :cascade do |t|
+    t.bigint "owner_id"
+    t.string "name"
+    t.index ["owner_id"], name: "index_pencas_on_owner_id"
+  end
+
+  create_table "prediction_values", force: :cascade do |t|
+    t.string "value"
+    t.integer "earned_points"
+    t.bigint "match_id"
+    t.bigint "initial_prediction_id"
+    t.bigint "user_id"
+    t.bigint "penca_id"
+    t.index ["initial_prediction_id"], name: "index_prediction_values_on_initial_prediction_id"
+    t.index ["match_id"], name: "index_prediction_values_on_match_id"
+    t.index ["penca_id"], name: "index_prediction_values_on_penca_id"
+    t.index ["user_id"], name: "index_prediction_values_on_user_id"
+  end
+
   create_table "users", id: :serial, force: :cascade do |t|
     t.string "email"
     t.string "encrypted_password", default: "", null: false
@@ -67,9 +115,14 @@ ActiveRecord::Schema.define(version: 20161027190856) do
     t.string "provider", default: "email", null: false
     t.string "uid", default: "", null: false
     t.json "tokens"
+    t.integer "total_points", default: 0
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["uid", "provider"], name: "index_users_on_uid_and_provider", unique: true
   end
 
+  add_foreign_key "prediction_values", "initial_predictions"
+  add_foreign_key "prediction_values", "matches"
+  add_foreign_key "prediction_values", "pencas"
+  add_foreign_key "prediction_values", "users"
 end

@@ -22,6 +22,7 @@
 #  provider               :string           default("email"), not null
 #  uid                    :string           default(""), not null
 #  tokens                 :json
+#  total_points           :integer          default(0)
 #
 # Indexes
 #
@@ -36,6 +37,9 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :trackable, :validatable
   include DeviseTokenAuth::Concerns::User
+
+  has_many :penca_users
+  has_many :pencas, through: :penca_users
 
   validates :uid, uniqueness: { scope: :provider }
 
